@@ -785,3 +785,12 @@ class GroupRenderingControl(Service):
         self.control_url = "/MediaRenderer/GroupRenderingControl/Control"
         self.event_subscription_url = \
             "/MediaRenderer/GroupRenderingControl/Event"
+
+
+class AudioIn(Service):
+
+    """Sonos audio input service, for functions relating to
+    audio input levels and attributes"""
+
+    def __init__(self, soco):
+        super(AudioIn, self).__init__(soco)

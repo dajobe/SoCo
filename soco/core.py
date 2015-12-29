@@ -26,7 +26,7 @@ from .music_library import MusicLibrary
 from .services import (
     DeviceProperties, ContentDirectory, RenderingControl, AVTransport,
     ZoneGroupTopology, AlarmClock, SystemProperties, MusicServices,
-    zone_group_state_shared_cache,
+    zone_group_state_shared_cache, AudioIn
 )
 from .utils import (
     really_utf8, camel_to_underscore, deprecated
@@ -202,6 +202,7 @@ class SoCo(_SocoSingletonBase):
         self.alarmClock = AlarmClock(self)
         self.systemProperties = SystemProperties(self)
         self.musicServices = MusicServices(self)
+        self.audioIn = AudioIn(self)
 
         self.music_library = MusicLibrary(self)
 
@@ -1835,7 +1836,49 @@ class SoCo(_SocoSingletonBase):
         raise ValueError('No match on "{0}" for value "{1}"'.format(attr_name,
                                                                     match))
 
+    @property
+    def audio_input_attributes(self):
+        """ Audio input name and icon attributes """
+        audio_attrs = self.audioIn.GetAudioInputAttributes()
+        return ( audio_attrs['CurrentName'], audio_attrs['CurrentIcon'] )
 
+    @audio_input_attributes.setter
+    def set_audio_input_attributes(self, name, icon):
+        """ Set the audio input name and icon attributes """
+        self.audioIn.SetAudioInputAttributes([
+            ('DesiredName', name),
+            ('DesiredIcon', icon)
+        ])
+
+    @property
+    def audio_input_line_levels(self):
+        """ The current audio left and right input levels """
+        audio_levels = self.audioIn.GetLineInLevel()
+        return (int(audio_levels['CurrentLeftLineInLevel']),
+                int(audio_levels['CurrentRightLineInLevel']))
+
+    @audio_input_line_levels.setter
+    def set_audio_input_line_levels(self, left, right):
+        """ Set the current audio input left and right line input levels """
+        self.audioIn.SetLineInLevel([
+            ('DesiredLeftLineInLevel', left),
+            ('DesiredRightLineInLevel', right)
+        ])
+
+    def audio_input_start_transmission_to_group(self, coord_id):
+        """start audio transmission to speaker group with given coordinator ID """
+        self.audioIn.StartTransmissionToGroup([('CoordinatorID', coord_id)])
+    
+    def audio_input_stop_transmission_to_group(self, coord_id):
+        """ stop audio transmission to speaker group with given coordinator ID """
+        self.audioIn.StopTransmissionToGroup([('CoordinatorID', coord_id)])
+
+    def audio_input_select_line_in(self):
+        """ select line in audio """
+        audio_id='urn:schemas-upnp-org:service:AudioIn:1'
+        self.audioIn.SelectAudio([('ObjectId', audio_id)])
+
+    
 # definition section
 
 RADIO_STATIONS = 0
